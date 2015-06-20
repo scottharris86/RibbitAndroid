@@ -15,6 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.parse.ParseAnalytics;
+import com.parse.ParseUser;
+
 import java.util.Locale;
 
 
@@ -41,10 +44,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        // Parse Analytics
+        ParseAnalytics.trackAppOpenedInBackground(getIntent());
+
+        ParseUser currentUser = ParseUser.getCurrentUser();
+
+        if (currentUser == null) {
+            navigateToLogin();
+        }
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -83,6 +90,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     }
 
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,8 +113,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_logout) {
+            ParseUser.logOut();
+            navigateToLogin();
+
         }
 
         return super.onOptionsItemSelected(item);
